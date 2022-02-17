@@ -13,12 +13,11 @@ from tinydb_ql import Query
 
 
 def load_data(dbpath):
-    db = tinydb.TinyDB(storage=tinydb.storages.MemoryStorage)
     if str(dbpath) == '-':
-        db.insert_multiple(json.load(sys.stdin))
+        db = tinydb.TinyDB(storage=tinydb.storages.MemoryStorage)
+        db.storage.write(json.load(sys.stdin))
     else:
-        with dbpath.open(encoding='utf-8') as infile:
-            db.insert_multiple(json.load(infile))
+        db = tinydb.TinyDB(dbpath, access_mode='r')
     return db
 
 
@@ -30,8 +29,8 @@ def parse_args(argv):
 
     parser = ArgumentParser()
     parser.add_argument(
-        'json_path', nargs='?', default='-', type=Path,
-        help='input JSON (default: "-" read from stdin)'
+        'db_path', nargs='?', default='-', type=Path,
+        help='input db (default: "-" read from stdin)'
     )
     parser.add_argument(
         'query', help='DB query'
@@ -65,7 +64,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv[1:])
-    db = load_data(args.json_path)
+    db = load_data(args.db_path)
     query = Query(json.loads(args.query)).as_tinydb_query()
     result = db.search(query)
     result_count = len(result)
