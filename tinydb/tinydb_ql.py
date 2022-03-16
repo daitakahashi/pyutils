@@ -254,8 +254,8 @@ class Regex(ParsedObject):
         'required': ['$regex']
     }
 
-    def render(self, _):
-        return self.value['$regex'].as_tinydb_query()
+    def render(self, current):
+        return self.value['$regex'].render(current)
 
 
 class DataList(ParsedObject):
